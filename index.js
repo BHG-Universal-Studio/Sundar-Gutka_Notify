@@ -43,18 +43,6 @@ app.get("/ping-server", authorizeWorker, (req, res) => {
   res.status(200).json({ success: true, message: "pong", timestamp: Date.now() });
 });
 
-// ✅ Delete Cloudinary Image
-app.post("/delete", async (req, res) => {
-  const publicId = req.body.public_id;
-  if (!publicId) return res.status(400).json({ success: false, message: "Missing public_id" });
-
-  try {
-    const result = await cloudinary.uploader.destroy(publicId);
-    return res.json({ success: true, result });
-  } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
-  }
-});
 
 
 const hukamTitles = [
@@ -144,7 +132,7 @@ app.post("/send-hukamnama", authorizeWorker, async (req, res) => {
     data: {
       destination: "hukamnama"
     },
-    topic: "daily-hukamnama" 
+    topic: "hukamnama" 
   };
 
   try {
@@ -266,8 +254,8 @@ const pathNightBodies = [
 
 
 // 🔔 Send Night Path Notification (secured)
-app.post("/send-night-path1", authorizeWorker, async (req, res) => {
-  const channelId = "bhg_path_night_channel"; 
+app.post("/send-path-night", authorizeWorker, async (req, res) => {
+  const channelId = "bhg_night_path"; 
  const title = pathNightTitles[Math.floor(Math.random() * pathNightTitles.length)];
   const body = pathNightBodies[Math.floor(Math.random() * pathNightBodies.length)];
 
@@ -284,7 +272,7 @@ app.post("/send-night-path1", authorizeWorker, async (req, res) => {
     data: {
       destination: "path"
     },
-    topic: "daily-path-night" 
+    topic: "night-path"
   };
 
   try {
@@ -376,99 +364,6 @@ app.post("/send-test-notification-token-with-destination", authorizeWorker, asyn
 
 
 
-
-
-
-
-const adminNotificationTitle = [
-  "📝 New Post Received",
-  "📝 New Post Submitted"
-];
-
-const adminNotificationBody = [
-  "A user submitted a new post for review.",
-  "A user submitted a new post for review checking."
-];
-
-
-
-
-// post admin Notification
-
-app.post("/notify-admin-post", async (req, res) => {
-  const channelId = "bhg_admin_channel"; 
-  const title = adminNotificationTitle[Math.floor(Math.random() * adminNotificationTitle.length)];
-  const body = adminNotificationBody[Math.floor(Math.random() * adminNotificationBody.length)];
-
-  const message = {
-    notification: { title, body },
-    android: {
-      notification: { channelId, sound: "default" } 
-    },
-    apns: {
-      payload: {
-        aps: { sound: "default" }
-      }
-    },
-    data: {
-      destination: "admin"
-    },
-    topic: "admin-app" 
-  };
-
-  try {
-    const response = await admin.messaging().send(message);
-    res.status(200).json({ success: true, message: "Post Notification sent", response });
-  } catch (err) {
-    console.error("FCM Error (notification):", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-
-
-
-
-const copyrightRequestTitle = [
-  "New Copyright Request Submitted",
-  "New Copyright Request Received"
-];
-
-const copyrightRequestBody = [
-  "A user submitted a copyright request for review.",
-  "A user submitted a copyright request for review checking."
-];
-
-
-app.post("/notify-copyright-request", async (req, res) => {
-  const channelId = "bhg_admin_channel"; 
-  const title = copyrightRequestTitle[Math.floor(Math.random() * copyrightRequestTitle.length)];
-  const body = copyrightRequestBody[Math.floor(Math.random() * copyrightRequestBody.length)];
-
-  const message = {
-    notification: { title, body },
-    android: {
-      notification: { channelId, sound: "default" } 
-    },
-    apns: {
-      payload: {
-        aps: { sound: "default" }
-      }
-    },
-    data: {
-      destination: "admin"
-    },
-    topic: "admin-app" 
-  };
-
-  try {
-    const response = await admin.messaging().send(message);
-    res.status(200).json({ success: true, message: "Copyright Request Notification sent", response });
-  } catch (err) {
-    console.error("FCM Error (notification):", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
 
 
 
