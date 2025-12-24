@@ -113,39 +113,33 @@ const hukamBodies = [
 ];
 
 
-// 🔔 Send Hukamnama Notification (DATA-ONLY, secured)
+// 🔔 Send Hukamnama Notification (secured)
 app.post("/send-hukamnama", authorizeWorker, async (req, res) => {
   const channelId = "bhg_hukamnama_channel"; 
   const title = hukamTitles[Math.floor(Math.random() * hukamTitles.length)];
   const body = hukamBodies[Math.floor(Math.random() * hukamBodies.length)];
 
   const message = {
-
-    data: {
-      title,
-      body,
-      destination: "hukamnama",
-      channel_id: channelId
-    },
-
-
-    topic: "hukamnama",
-
-
+    notification: { title, body },
     android: {
-      priority: "high"
-    }
+      notification: { channelId, sound: "default" } 
+    },
+    apns: {
+      payload: {
+        aps: { sound: "default" }
+      }
+    },
+    data: {
+      destination: "hukamnama"
+    },
+    topic: "hukamnama" 
   };
 
   try {
     const response = await admin.messaging().send(message);
-    res.status(200).json({
-      success: true,
-      message: "Hukamnama (data-only) sent",
-      response
-    });
+    res.status(200).json({ success: true, message: "Hukamnama sent", response });
   } catch (err) {
-    console.error("FCM Error (hukamnama data-only):", err);
+    console.error("FCM Error (hukamnama):", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
