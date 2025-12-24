@@ -113,36 +113,43 @@ const hukamBodies = [
 ];
 
 
-// 🔔 Send Hukamnama Notification (secured)
+// 🔔 Send Hukamnama Notification (DATA-ONLY, secured)
 app.post("/send-hukamnama", authorizeWorker, async (req, res) => {
   const channelId = "bhg_hukamnama_channel"; 
   const title = hukamTitles[Math.floor(Math.random() * hukamTitles.length)];
   const body = hukamBodies[Math.floor(Math.random() * hukamBodies.length)];
 
   const message = {
-    notification: { title, body },
-    android: {
-      notification: { channelId, sound: "default" } 
-    },
-    apns: {
-      payload: {
-        aps: { sound: "default" }
-      }
-    },
+
     data: {
-      destination: "hukamnama"
+      title,
+      body,
+      destination: "hukamnama",
+      channel_id: channelId
     },
-    topic: "hukamnama" 
+
+
+    topic: "hukamnama",
+
+
+    android: {
+      priority: "high"
+    }
   };
 
   try {
     const response = await admin.messaging().send(message);
-    res.status(200).json({ success: true, message: "Hukamnama sent", response });
+    res.status(200).json({
+      success: true,
+      message: "Hukamnama (data-only) sent",
+      response
+    });
   } catch (err) {
-    console.error("FCM Error (hukamnama):", err);
+    console.error("FCM Error (hukamnama data-only):", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 
 
@@ -188,34 +195,40 @@ const pathBodies = [
 
 
 
-// 🔔 Send Path Notification (secured)
+// 🔔 Send Path Notification (DATA-ONLY, secured)
 app.post("/send-path", authorizeWorker, async (req, res) => {
   const channelId = "bhg_path_channel"; 
   const title = pathTitles[Math.floor(Math.random() * pathTitles.length)];
   const body = pathBodies[Math.floor(Math.random() * pathBodies.length)];
 
   const message = {
-    notification: { title, body },
-    android: {
-      notification: { channelId, sound: "default" }
-    },
-    apns: {
-      payload: {
-        aps: { sound: "default" }
-      }
-    },
+    // ✅ DATA-ONLY PAYLOAD
     data: {
-  destination: "pathradio",
-  playSpecial: "true"
-},
-    topic: "daily-path" 
+      title,
+      body,
+      destination: "pathradio",
+      playSpecial: "true",
+      channel_id: channelId
+    },
+
+    // ✅ Topic delivery
+    topic: "daily-path",
+
+    // ✅ Ensure background delivery
+    android: {
+      priority: "high"
+    }
   };
 
   try {
     const response = await admin.messaging().send(message);
-    res.status(200).json({ success: true, message: "Path sent", response });
+    res.status(200).json({
+      success: true,
+      message: "Path (data-only) sent",
+      response
+    });
   } catch (err) {
-    console.error("FCM Error (path):", err);
+    console.error("FCM Error (path data-only):", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -252,74 +265,42 @@ const pathNightBodies = [
 
 
 
-
-// 🔔 Send Night Path Notification (secured)
+// 🔔 Send Night Path Notification (DATA-ONLY, secured)
 app.post("/send-path-night", authorizeWorker, async (req, res) => {
   const channelId = "bhg_night_path"; 
- const title = pathNightTitles[Math.floor(Math.random() * pathNightTitles.length)];
+  const title = pathNightTitles[Math.floor(Math.random() * pathNightTitles.length)];
   const body = pathNightBodies[Math.floor(Math.random() * pathNightBodies.length)];
 
   const message = {
-    notification: { title, body },
-    android: {
-      notification: { channelId, sound: "default" } 
-    },
-    apns: {
-      payload: {
-        aps: { sound: "default" }
-      }
-    },
+    // ✅ DATA-ONLY PAYLOAD
     data: {
-      destination: "path"
+      title,
+      body,
+      destination: "path",
+      channel_id: channelId
     },
-    topic: "night-path"
-  };
 
-  try {
-    const response = await admin.messaging().send(message);
-    res.status(200).json({ success: true, message: "Night Path sent", response });
-  } catch (err) {
-    console.error("FCM Error (night-path):", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+    // ✅ Topic delivery
+    topic: "night-path",
 
-
-
-
-
-
-// 🔔 Send Notification To Specific Device Token (secured)
-app.post("/send-test-notification-with-token", authorizeWorker, async (req, res) => {
-  const { token, title, body, data } = req.body;
-
-  if (!token || !title || !body) {
-    return res.status(400).json({ success: false, error: "Missing required fields" });
-  }
-
-  const message = {
-    token,
-    notification: { title, body },
+    // ✅ Ensure background delivery
     android: {
-      notification: { sound: "default" }
-    },
-    apns: {
-      payload: {
-        aps: { sound: "default" }
-      }
-    },
-    data: data || {}
+      priority: "high"
+    }
   };
 
   try {
     const response = await admin.messaging().send(message);
-    res.status(200).json({ success: true, message: "Test Notification Sent", response });
+    res.status(200).json({
+      success: true,
+      message: "Night Path (data-only) sent",
+      response
+    });
   } catch (err) {
-    console.error("FCM Error (token):", err);
+    console.error("FCM Error (night-path data-only):", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
 
 
 
@@ -365,11 +346,7 @@ app.post("/send-test-notification-token-with-destination", authorizeWorker, asyn
 });
 
 
-
-
-
-
-
+// test command cmd curl -X POST "https://sundar-gutka.onrender.com/send-test-notification-token-with-destination" -H "Authorization: Bearer MySecret" -H "Content-Type: application/json" -d "{\"token\":\"Fcm_Token\"}"
 
 
 // ✅ Start Server
