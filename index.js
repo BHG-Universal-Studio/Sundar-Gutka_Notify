@@ -340,7 +340,7 @@ app.post("/send-test-notification-token-with-destination", authorizeWorker, asyn
     android: {
       notification: {
         sound: "default",
-        channelId: "bhg_general_channel", 
+        channelId: "bhg_hukamnama_channel", 
       }
     },
     apns: {
@@ -349,7 +349,7 @@ app.post("/send-test-notification-token-with-destination", authorizeWorker, asyn
       }
     },
     data: {
-      destination: "pathradio"
+      destination: "hukamnama"
     }
   };
 
