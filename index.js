@@ -323,7 +323,7 @@ app.post("/send-test-notification-with-token", authorizeWorker, async (req, res)
 
 
 
-// 🔔 Send Hukamnama Notification To Specific Device Token (secured)
+// 🔔 Send Hukamnama Notification To Specific Device Token (DATA-ONLY)
 app.post("/send-test-notification-token-with-destination", authorizeWorker, async (req, res) => {
   const { token } = req.body;
 
@@ -336,31 +336,34 @@ app.post("/send-test-notification-token-with-destination", authorizeWorker, asyn
 
   const message = {
     token,
-    notification: { title, body },
-    android: {
-      notification: {
-        sound: "default",
-        channelId: "bhg_hukamnama_channel", 
-      }
-    },
-    apns: {
-      payload: {
-        aps: { sound: "default" }
-      }
-    },
+
+    // ✅ DATA-ONLY PAYLOAD (CRITICAL)
     data: {
-      destination: "hukamnama"
+      title,
+      body,
+      destination: "hukamnama",
+      channel_id: "bhg_hukamnama_channel"
+    },
+
+    // ✅ Ensure delivery in background
+    android: {
+      priority: "high"
     }
   };
 
   try {
     const response = await admin.messaging().send(message);
-    res.status(200).json({ success: true, message: "sent to token", response });
+    res.status(200).json({
+      success: true,
+      message: "DATA-ONLY notification sent",
+      response
+    });
   } catch (err) {
-    console.error("FCM Error (hukamnama token):", err);
+    console.error("FCM Error (data-only hukamnama):", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 
 
